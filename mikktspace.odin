@@ -85,12 +85,21 @@ generate_tangent_space :: proc(
 	tex_coords: [][2]f32,
 	normals: [][3]f32,
 	indices: []u16,
-) -> (
-	tangent: [][3]f32,
-	bitangent: [][3]f32,
+	out_tangents: [][3]f32,
+	out_bitangents: [][3]f32,
 ) {
-	assert(len(positions) == len(tex_coords), "Positions and Tex Coords need to be same length")
-	assert(len(positions) == len(normals), "Positions and normals need to be same length")
+	vertex_count := len(positions)
+	assert(vertex_count == len(tex_coords), "Positions and Tex Coords need to be same length")
+	assert(vertex_count == len(normals), "Positions and normals need to be same length")
+
+	assert(
+		vertex_count == len(out_tangents),
+		"Require an output tangent array same length as input positions",
+	)
+	assert(
+		vertex_count == len(out_bitangents),
+		"Require an output bitangent array same length as input positions",
+	)
 
 	VertexData :: struct {
 		positions:  [][3]f32,
@@ -107,8 +116,8 @@ generate_tangent_space :: proc(
 	vertex_data := VertexData{positions, tex_coords, normals, tangents, bitangents, indices}
 
 	get_num_faces_callback: getNumFacesCallback = proc "c" (pContext: ^SMikkTSpaceContext) -> i32 {
-		mesh_info: ^VertexData = (^VertexData)(pContext.m_pUserData)
-		num := i32(len(mesh_info.indices) / 3)
+		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
+		num := i32(len(vertex_data.indices) / 3)
 		return num
 	}
 
@@ -125,16 +134,16 @@ generate_tangent_space :: proc(
 		iFace: i32,
 		iVert: i32,
 	) {
-		mesh_info: ^VertexData = (^VertexData)(pContext.m_pUserData)
+		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
 		v: [3]f32
 		i := iFace * 3 + iVert
-		if len(mesh_info.indices) > 0 {
-			index := mesh_info.indices[i]
-			if int(index) < len(mesh_info.positions) {
-				v = mesh_info.positions[index]
+		if len(vertex_data.indices) > 0 {
+			index := vertex_data.indices[i]
+			if int(index) < len(vertex_data.positions) {
+				v = vertex_data.positions[index]
 			}
 		} else {
-			v = mesh_info.positions[i]
+			v = vertex_data.positions[i]
 		}
 
 		fvPosOut[0] = v.x
@@ -148,16 +157,16 @@ generate_tangent_space :: proc(
 		iFace: i32,
 		iVert: i32,
 	) {
-		mesh_info: ^VertexData = (^VertexData)(pContext.m_pUserData)
+		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
 
 		v: [3]f32
-		if len(mesh_info.indices) > 0 {
-			index := mesh_info.indices[iFace * 3 + iVert]
-			if int(index) < len(mesh_info.normals) {
-				v = mesh_info.normals[index]
+		if len(vertex_data.indices) > 0 {
+			index := vertex_data.indices[iFace * 3 + iVert]
+			if int(index) < len(vertex_data.normals) {
+				v = vertex_data.normals[index]
 			}
 		} else {
-			v = mesh_info.normals[iFace * 3 + iVert]
+			v = vertex_data.normals[iFace * 3 + iVert]
 		}
 
 		fvNormOut[0] = v.x
@@ -171,15 +180,15 @@ generate_tangent_space :: proc(
 		iFace: i32,
 		iVert: i32,
 	) {
-		mesh_info: ^VertexData = (^VertexData)(pContext.m_pUserData)
+		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
 		v: [2]f32
-		if len(mesh_info.indices) > 0 {
-			index := mesh_info.indices[iFace * 3 + iVert]
-			if int(index) < len(mesh_info.normals) {
-				v = mesh_info.tex_coords[index]
+		if len(vertex_data.indices) > 0 {
+			index := vertex_data.indices[iFace * 3 + iVert]
+			if int(index) < len(vertex_data.normals) {
+				v = vertex_data.tex_coords[index]
 			}
 		} else {
-			v = mesh_info.tex_coords[iFace * 3 + iVert]
+			v = vertex_data.tex_coords[iFace * 3 + iVert]
 		}
 
 		fvTexcOut[0] = v.x
@@ -196,26 +205,25 @@ generate_tangent_space :: proc(
 		iFace: i32,
 		iVert: i32,
 	) {
-		mesh_info: ^VertexData = (^VertexData)(pContext.m_pUserData)
+		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
 
 		tangent: [3]f32 = {fvTangent[0], fvTangent[1], fvTangent[2]}
 		bitangent: [3]f32 = -{fvBiTangent[0], fvBiTangent[1], fvBiTangent[2]}
 
-		if len(mesh_info.indices) > 0 {
-			index := mesh_info.indices[iFace * 3 + iVert]
-			if int(index) < len(mesh_info.tangents) {
-				mesh_info.tangents[index] = tangent
+		if len(vertex_data.indices) > 0 {
+			index := vertex_data.indices[iFace * 3 + iVert]
+			if int(index) < len(vertex_data.tangents) {
+				vertex_data.tangents[index] = tangent
 			}
 
-			if int(index) < len(mesh_info.bitangents) {
-				mesh_info.bitangents[index] = bitangent
+			if int(index) < len(vertex_data.bitangents) {
+				vertex_data.bitangents[index] = bitangent
 			}
 		} else {
-			mesh_info.tangents[iFace * 3 + iVert] = tangent
-			mesh_info.bitangents[iFace * 3 + iVert] = bitangent
+			vertex_data.tangents[iFace * 3 + iVert] = tangent
+			vertex_data.bitangents[iFace * 3 + iVert] = bitangent
 		}
 	}
-
 
 	interface := SMikkTSpaceInterface {
 		m_getNumFaces          = get_num_faces_callback,
@@ -232,7 +240,5 @@ generate_tangent_space :: proc(
 	}
 
 	genTangSpaceDefault(&ctx)
-
-	return
 }
 
