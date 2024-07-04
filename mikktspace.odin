@@ -212,7 +212,7 @@ generate_tangent_space :: proc(
 		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
 
 		tangent: [3]f32 = {fvTangent[0], fvTangent[1], fvTangent[2]}
-		bitangent: [3]f32 = -{fvBiTangent[0], fvBiTangent[1], fvBiTangent[2]}
+		bitangent: [3]f32 = {fvBiTangent[0], fvBiTangent[1], fvBiTangent[2]}
 
 		if len(vertex_data.indices) > 0 {
 			index := vertex_data.indices[iFace * 3 + iVert]
