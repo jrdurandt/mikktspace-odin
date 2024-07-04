@@ -1,0 +1,10 @@
+*.exe
+*.ll
+*.obj
+*.bin
+
+**.exp
+
+*.a
+*.o
+*.dll
