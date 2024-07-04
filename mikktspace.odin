@@ -110,10 +110,14 @@ generate_tangent_space :: proc(
 		indices:    []u16,
 	}
 
-	tangents := make([][3]f32, len(positions))
-	bitangents := make([][3]f32, len(positions))
-
-	vertex_data := VertexData{positions, tex_coords, normals, tangents, bitangents, indices}
+	vertex_data := VertexData {
+		positions,
+		tex_coords,
+		normals,
+		out_tangents,
+		out_bitangents,
+		indices,
+	}
 
 	get_num_faces_callback: getNumFacesCallback = proc "c" (pContext: ^SMikkTSpaceContext) -> i32 {
 		vertex_data: ^VertexData = (^VertexData)(pContext.m_pUserData)
