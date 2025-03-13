@@ -1,9 +1,14 @@
 package mikktspace
 
-import c "core:c"
+when ODIN_OS == .Linux {
+	foreign import lib "lib/linux/libmikktspace.a"
+} else when ODIN_OS == .Darwin {
+	foreign import lib "lib/darwin/libmikktspace.a"
+} else when ODIN_OS == .Windows {
+	foreign import lib "lib/windows/mikktspace.lib"
+}
 
-//I only have a linux system to build on and too lazy to spin up a Windows VM so only linux for now.
-when ODIN_OS == .Linux do foreign import mikktspace "./lib/mikktspace.a"
+import c "core:c"
 
 tbool :: distinct c.int
 
@@ -70,16 +75,14 @@ SMikkTSpaceInterface :: struct {
 }
 
 @(default_calling_convention = "c")
-foreign mikktspace {
+foreign lib {
 	genTangSpaceDefault :: proc(pContext: ^SMikkTSpaceContext) -> tbool ---
 	genTangSpace :: proc(pContext: ^SMikkTSpaceContext, fAngularThreshold: c.float) -> tbool ---
 }
 
-
-//TODO: Simple interface
-
+//Simplified usage of MikkTSpace lib
 //A lot of this has been adapted from Godot's usage of MikkTSpace.
-//User needs to delete tangent and bitangent data after.
+//User needs to allocate and delete tangent and bitangent data after.
 generate_tangent_space :: proc(
 	positions: [][3]f32,
 	tex_coords: [][2]f32,
@@ -245,4 +248,3 @@ generate_tangent_space :: proc(
 
 	genTangSpaceDefault(&ctx)
 }
-

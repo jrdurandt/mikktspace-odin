@@ -8,3 +8,7 @@
 *.a
 *.o
 *.dll
+
+.zig-cache/
+zig-out/
+lib/
