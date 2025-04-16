@@ -82,12 +82,13 @@ foreign lib {
 
 //Simplified usage of MikkTSpace lib
 //A lot of this has been adapted from Godot's usage of MikkTSpace.
-//User needs to allocate and delete tangent and bitangent data after.
+//User needs and delete tangent and bitangent data after.
 generate_tangent_space :: proc(
 	positions: [][3]f32,
 	tex_coords: [][2]f32,
 	normals: [][3]f32,
 	indices: []u16,
+) -> (
 	out_tangents: [][3]f32,
 	out_bitangents: [][3]f32,
 ) {
@@ -95,14 +96,8 @@ generate_tangent_space :: proc(
 	assert(vertex_count == len(tex_coords), "Positions and Tex Coords need to be same length")
 	assert(vertex_count == len(normals), "Positions and normals need to be same length")
 
-	assert(
-		vertex_count == len(out_tangents),
-		"Require an output tangent array same length as input positions",
-	)
-	assert(
-		vertex_count == len(out_bitangents),
-		"Require an output bitangent array same length as input positions",
-	)
+	out_tangents = make([][3]f32, vertex_count)
+	out_bitangents = make([][3]f32, vertex_count)
 
 	VertexData :: struct {
 		positions:  [][3]f32,
@@ -247,4 +242,5 @@ generate_tangent_space :: proc(
 	}
 
 	genTangSpaceDefault(&ctx)
+	return
 }
