@@ -2,35 +2,14 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
 
-    const lib = b.addStaticLibrary(.{
-        .name = "mikktspace",
+    const mikktspace = b.dependency("mikktspace_zig", .{
         .target = target,
-        .optimize = optimize,
+        .optimize = .ReleaseFast,
     });
 
-    lib.linkLibC();
-    lib.addIncludePath(b.path("src/mikktspace.h"));
-    lib.addCSourceFiles(.{
-        .files = &.{
-            "src/mikktspace.c",
-        },
-        .flags = &.{
-            "-fPIC",
-            "-fno-sanitize=undefined",
-        },
-    });
-
-    const dst = switch (target.result.os.tag) {
-        .windows => "../lib/windows",
-        .linux => "../lib/linux",
-        .macos => "../lib/macos",
-        else => unreachable,
-    };
-
-    const install_artifact = b.addInstallArtifact(lib, .{
-        .dest_dir = .{ .override = .{ .custom = dst } },
-    });
-    b.getInstallStep().dependOn(&install_artifact.step);
+    //Copies library to root directory
+    b.getInstallStep().dependOn(&b.addInstallArtifact(mikktspace.artifact("mikktspace"), .{
+        .dest_dir = .{ .override = .{ .custom = "../" } },
+    }).step);
 }

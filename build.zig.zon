@@ -1,0 +1,17 @@
+.{
+    .name = .mikktspace_odin,
+    .version = "0.0.0",
+    .fingerprint = 0x2e7f1d13b708f8f5, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.14.0",
+    .dependencies = .{
+        .mikktspace_zig = .{
+            .url = "git+https://github.com/jrdurandt/mikktspace-zig#5abbb902906ed6ce29bf55753375bba8978f312e",
+            .hash = "mikktspace_zig-0.0.0-muD-QAoGAACoAxiNe5Snp_eyHDm2p3Y8geE7vq1I2nl9",
+        },
+    },
+
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+    },
+}

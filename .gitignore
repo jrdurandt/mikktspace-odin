@@ -8,6 +8,8 @@
 *.a
 *.o
 *.dll
+*.lib
+*.dylib
 
 .zig-cache/
 zig-out/

@@ -1,11 +1,11 @@
 package mikktspace
 
 when ODIN_OS == .Linux {
-	foreign import lib "lib/linux/libmikktspace.a"
+	foreign import lib "libmikktspace.a"
 } else when ODIN_OS == .Darwin {
-	foreign import lib "lib/darwin/libmikktspace.a"
+	foreign import lib "libmikktspace.a"
 } else when ODIN_OS == .Windows {
-	foreign import lib "lib/windows/mikktspace.lib"
+	foreign import lib "mikktspace.lib"
 }
 
 import c "core:c"
