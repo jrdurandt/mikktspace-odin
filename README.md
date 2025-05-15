@@ -6,22 +6,7 @@ MikkTSpace algorithm used to generate tangent and normal maps. Implemented by Mo
 
 > mikktspace used under MIT License, included in source files
 
-## Build:
-
-Require: [Zig](https://ziglang.org/)
-
-### Linux:
-```
-zig build -Dtarget=x86_64-linux
-```
-
-### Windows:
-```
-zig build -Dtarget=x86_64-windows
-```
-
-### MacOS (Darwin):
-```
-zig build -Dtarget=x86_64-macos
-zig build -Dtarget=arm64-macos
-```
+Includes a simplified wrapper to use the library functions.
+A lot of it has been adapted from Godot's usage of MikkTSpace.
+The function allocates tangents and bitanget, caller needs and delete tangent and bitangent data after.
+See test for usage example.

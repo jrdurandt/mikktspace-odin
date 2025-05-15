@@ -87,7 +87,8 @@ foreign lib {
 
 //Simplified usage of MikkTSpace lib
 //A lot of this has been adapted from Godot's usage of MikkTSpace.
-//User needs and delete tangent and bitangent data after.
+//Function allocates tangents and bitanget, caller needs and delete tangent and bitangent data after.
+//See test for usage example
 generate_tangent_space :: proc(
 	positions: [][3]f32,
 	tex_coords: [][2]f32,
