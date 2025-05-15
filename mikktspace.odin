@@ -1,14 +1,19 @@
 package mikktspace
 
 when ODIN_OS == .Linux {
-	foreign import lib "libmikktspace.a"
-} else when ODIN_OS == .Darwin {
-	foreign import lib "libmikktspace.a"
+	foreign import lib "x86_64-linux/libmikktspace.a"
 } else when ODIN_OS == .Windows {
-	foreign import lib "mikktspace.lib"
+	foreign import lib "x86_64-windows/mikktspace.lib"
+} else when ODIN_OS == .Darwin {
+	when ODIN_ARCH == .arm64 {
+		foreign import lib "aarch64-macos/libmikktspace.a"
+	} else {
+		foreign import lib "x86_64-macos/libmikktspace.a"
+	}
 }
 
 import c "core:c"
+import "core:testing"
 
 tbool :: distinct c.int
 
@@ -243,4 +248,26 @@ generate_tangent_space :: proc(
 
 	genTangSpaceDefault(&ctx)
 	return
+}
+
+//Create a simple quad on xy plane with normals facing in -z direction.
+//Generating tangents and bitangents, tangents should face in +x direction and bitangents in -y direction
+@(test)
+test :: proc(t: ^testing.T) {
+	positions := [][3]f32{{-1, 1, 0}, {1, 1, 0}, {1, -1, 0}, {-1, -1, 0}}
+	tex_coords := [][2]f32{{0, 0}, {1, 0}, {1, 1}, {0, 1}}
+	normals := [][3]f32{{0, 0, -1}, {0, 0, -1}, {0, 0, -1}, {0, 0, -1}}
+	indices := []u16{0, 1, 2, 2, 3, 0}
+
+	tangents, bitangents := generate_tangent_space(positions, tex_coords, normals, indices)
+	defer delete(tangents)
+	defer delete(bitangents)
+
+	for tangent in tangents {
+		testing.expectf(t, tangent == {1, 0, 0}, "Invalid tangent generated: %v", tangent)
+	}
+
+	for bitangent in bitangents {
+		testing.expectf(t, bitangent == {0, -1, 0}, "Invalid bitangent generated: %v", bitangent)
+	}
 }

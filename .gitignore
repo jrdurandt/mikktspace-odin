@@ -1,16 +1,1 @@
-*.exe
-*.ll
-*.obj
-*.bin
-
-**.exp
-
-*.a
-*.o
-*.dll
-*.lib
-*.dylib
-
-.zig-cache/
-zig-out/
-lib/
+mikktspace-odin
