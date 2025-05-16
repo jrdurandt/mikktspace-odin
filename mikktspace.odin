@@ -1,16 +1,20 @@
 package mikktspace
 
-when ODIN_OS == .Linux {
-	foreign import lib "x86_64-linux/libmikktspace.a"
-} else when ODIN_OS == .Windows {
-	foreign import lib "x86_64-windows/mikktspace.lib"
-} else when ODIN_OS == .Darwin {
-	when ODIN_ARCH == .arm64 {
-		foreign import lib "aarch64-macos/libmikktspace.a"
-	} else {
-		foreign import lib "x86_64-macos/libmikktspace.a"
-	}
+@(private)
+LIB :: (
+    "lib/mikktspace.lib" when ODIN_OS == .Windows
+    else "lib/mikktspace.a" when ODIN_OS == .Linux
+    else "lib/darwin/mikktspace.a" when ODIN_OS == .Darwin
+    else ""
+)
+
+when LIB != "" {
+    when !#exists(LIB) {
+        #panic("Could not find the compiled mikktspace library")
+    }
 }
+
+foreign import lib { LIB }
 
 import c "core:c"
 import "core:testing"
